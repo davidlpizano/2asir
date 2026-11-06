@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+GW_WAN="@@GW_WAN@@"
+IF_WAN=$(ip -o -4 addr show | awk '$4 ~ /^172\.26\.30\./ {print $2; exit}')
+IF_NAT=$(ip -o -4 addr show | awk '$4 ~ /^10\.0\.2\./ {print $2; exit}')
+
+if [ -z "$IF_WAN" ]; then
+    echo "Could not detect the WAN interface." >&2
+    exit 1
+fi
+
+if [ -n "$IF_NAT" ]; then
+    while ip route del default dev "$IF_NAT" 2>/dev/null; do :; done
+fi
+
+ip route replace default via "$GW_WAN" dev "$IF_WAN"

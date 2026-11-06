@@ -1,0 +1,6 @@
+.vagrant/
+.lab-secrets.json
+*.swp
+*~
+__pycache__/
+*.py[cod]

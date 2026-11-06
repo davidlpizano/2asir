@@ -1,0 +1,13 @@
+[Unit]
+Description=Ruta por defecto WAN
+After=network-online.target
+Wants=network-online.target
+Before=keepalived.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/kea-fix-routes.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

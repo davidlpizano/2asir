@@ -1,0 +1,25 @@
+include "/etc/bind/keys/transfer.key";
+
+server 192.168.10.10 {
+    keys { transfer-key; };
+};
+
+zone "asir.lan" {
+    type slave;
+    file "/var/cache/bind/db.asir.lan";
+    masters { 192.168.10.10; };
+    allow-transfer { none; };
+};
+
+zone "10.168.192.in-addr.arpa" {
+    type slave;
+    file "/var/cache/bind/db.10.168.192";
+    masters { 192.168.10.10; };
+    allow-transfer { none; };
+};
+
+zone "es.asir.lan" {
+    type master;
+    file "/var/lib/bind/db.es.asir.lan";
+    allow-transfer { none; };
+};

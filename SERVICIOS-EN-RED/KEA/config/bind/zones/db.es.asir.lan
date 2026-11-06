@@ -1,0 +1,14 @@
+$TTL 3600
+@   IN SOA nssub.es.asir.lan. admin.es.asir.lan. (
+        2026110401 ; Serial (incrementar tras cada edición manual)
+        3600
+        900
+        1209600
+        3600
+)
+
+$ORIGIN es.asir.lan.
+@       IN NS   nssub.es.asir.lan.
+nssub   IN A    192.168.10.11
+www     IN A    192.168.10.70
+ftp     IN A    192.168.10.71

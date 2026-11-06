@@ -1,0 +1,26 @@
+$TTL 3600
+@   IN SOA dns1.asir.lan. admin.asir.lan. (
+        2026110401 ; Serial (incrementar tras cada edición manual)
+        3600       ; Refresh
+        900        ; Retry
+        1209600    ; Expire
+        3600       ; Negative cache TTL
+)
+
+$ORIGIN asir.lan.
+@       IN NS   dns1.asir.lan.
+@       IN NS   dns2.asir.lan.
+
+router      IN A 192.168.10.1
+kea1        IN A 192.168.10.2
+kea2        IN A 192.168.10.3
+dns1        IN A 192.168.10.10
+dns2        IN A 192.168.10.11
+impresora   IN A 192.168.10.50
+
+$ORIGIN virtual.asir.lan.
+www         IN A 192.168.10.60
+
+$ORIGIN es.asir.lan.
+@           IN NS   nssub.es.asir.lan.
+nssub       IN A    192.168.10.11

@@ -1,0 +1,100 @@
+{
+  "Dhcp4": {
+    "interfaces-config": { "interfaces": ["@@IF_LAN@@"] },
+    "control-socket": {
+      "socket-type": "unix",
+      "socket-name": "/run/kea/kea4-ctrl-socket"
+    },
+    "lease-database": {
+      "type": "memfile",
+      "persist": true,
+      "name": "/var/lib/kea/kea-leases4.csv",
+      "lfc-interval": 3600
+    },
+    "dhcp-ddns": {
+      "enable-updates": true,
+      "server-ip": "127.0.0.1",
+      "server-port": 53001
+    },
+    "ddns-send-updates": true,
+    "ddns-qualifying-suffix": "asir.lan",
+    "ddns-override-client-update": true,
+    "ddns-override-no-update": true,
+    "ddns-replace-client-name": "when-not-present",
+    "hostname-char-set": "[^A-Za-z0-9.-]",
+    "hostname-char-replacement": "",
+    "valid-lifetime": 3600,
+    "renew-timer": 1800,
+    "rebind-timer": 3150,
+    "option-data": [
+      {
+        "name": "domain-name-servers",
+        "data": "192.168.10.10, 192.168.10.11"
+      },
+      { "name": "domain-name", "data": "asir.lan" }
+    ],
+    "hooks-libraries": [
+      {
+        "library": "/usr/lib/x86_64-linux-gnu/kea/hooks/libdhcp_lease_cmds.so"
+      },
+      {
+        "library": "/usr/lib/x86_64-linux-gnu/kea/hooks/libdhcp_ha.so",
+        "parameters": {
+          "high-availability": [
+            {
+              "this-server-name": "@@THIS_NAME@@",
+              "mode": "hot-standby",
+              "heartbeat-delay": 10000,
+              "max-response-delay": 30000,
+              "max-ack-delay": 5000,
+              "max-unacked-clients": 3,
+              "multi-threading": {
+                "enable-multi-threading": true,
+                "http-dedicated-listener": true,
+                "http-listener-threads": 2,
+                "http-client-threads": 2
+              },
+              "peers": [
+                {
+                  "name": "kea1",
+                  "url": "http://192.168.10.2:8001/",
+                  "role": "primary",
+                  "auto-failover": true
+                },
+                {
+                  "name": "kea2",
+                  "url": "http://192.168.10.3:8001/",
+                  "role": "standby",
+                  "auto-failover": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "subnet4": [
+      {
+        "id": 1,
+        "subnet": "192.168.10.0/24",
+        "interface": "@@IF_LAN@@",
+        "pools": [{ "pool": "192.168.10.100 - 192.168.10.200" }],
+        "option-data": [{ "name": "routers", "data": "@@VIP_LAN@@" }],
+        "reservations": [
+          {
+            "hw-address": "08:00:27:aa:bb:cc",
+            "ip-address": "192.168.10.50",
+            "hostname": "impresora-aula"
+          }
+        ]
+      }
+    ],
+    "loggers": [
+      {
+        "name": "kea-dhcp4",
+        "output_options": [{ "output": "syslog" }],
+        "severity": "INFO"
+      }
+    ]
+  }
+}

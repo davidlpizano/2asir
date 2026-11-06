@@ -1,0 +1,18 @@
+$TTL 3600
+@   IN SOA dns1.asir.lan. admin.asir.lan. (
+        2026110401 ; Serial (incrementar tras cada edición manual)
+        3600
+        900
+        1209600
+        3600
+)
+
+@   IN NS dns1.asir.lan.
+@   IN NS dns2.asir.lan.
+
+1   IN PTR router.asir.lan.
+2   IN PTR kea1.asir.lan.
+3   IN PTR kea2.asir.lan.
+10  IN PTR dns1.asir.lan.
+11  IN PTR dns2.asir.lan.
+50  IN PTR impresora.asir.lan.

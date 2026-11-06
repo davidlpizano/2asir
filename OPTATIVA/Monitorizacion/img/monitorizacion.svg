@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title description">
+  <title id="title">Monitorización del sistema</title>
+  <desc id="description">Ilustración de un panel con métricas de procesos, memoria, disco y red.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101b33"/>
+      <stop offset="1" stop-color="#182d4b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#42d6c3"/>
+      <stop offset="1" stop-color="#67a9ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="360" rx="28" fill="url(#background)"/>
+  <circle cx="1060" cy="48" r="130" fill="#67a9ff" opacity=".08"/>
+  <circle cx="1120" cy="310" r="170" fill="#42d6c3" opacity=".07"/>
+  <g fill="#eaf3ff" font-family="system-ui, sans-serif">
+    <text x="72" y="106" font-size="18" font-weight="700" letter-spacing="4" fill="#7fe1d4">SISTEMAS · MÉTRICAS · ESTADO</text>
+    <text x="68" y="174" font-size="48" font-weight="700">Monitorización</text>
+    <text x="72" y="216" font-size="20" fill="#b9c9df">Una vista clara de los recursos de tu sistema</text>
+  </g>
+  <g transform="translate(720 66)">
+    <rect width="410" height="228" rx="18" fill="#0c1729" stroke="#3a5273" stroke-width="2"/>
+    <g stroke="#293d59" stroke-width="1">
+      <path d="M30 54H380M30 94H380M30 134H380M30 174H380"/>
+      <path d="M95 34V194M165 34V194M235 34V194M305 34V194"/>
+    </g>
+    <g fill="#9db3ce" font-family="system-ui, sans-serif" font-size="12">
+      <text x="30" y="30">ACTIVIDAD DEL SISTEMA</text>
+      <text x="30" y="215">PROCESOS</text>
+      <text x="145" y="215">MEMORIA</text>
+      <text x="260" y="215">RED</text>
+    </g>
+    <path d="M30 148L76 136L117 151L158 105L198 119L239 77L279 94L326 57L380 70" fill="none" stroke="url(#accent)" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+    <g fill="#42d6c3">
+      <circle cx="76" cy="136" r="5"/>
+      <circle cx="158" cy="105" r="5"/>
+      <circle cx="239" cy="77" r="5"/>
+      <circle cx="326" cy="57" r="5"/>
+    </g>
+  </g>
+</svg>

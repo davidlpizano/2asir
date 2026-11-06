@@ -1,0 +1,8 @@
+#!/usr/sbin/nft -f
+flush ruleset
+table ip nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        ip saddr 192.168.10.0/24 oifname "@@IF_WAN@@" snat to @@VIP_WAN@@
+    }
+}

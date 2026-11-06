@@ -1,0 +1,95 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "base64"
+require "json"
+require "securerandom"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  secrets_path = File.join(__dir__, ".lab-secrets.json")
+  unless File.exist?(secrets_path)
+    secrets = {
+      "TRANSFER_KEY" => Base64.strict_encode64(SecureRandom.random_bytes(32)),
+      "DDNS_KEY" => Base64.strict_encode64(SecureRandom.random_bytes(32))
+    }
+    File.write(secrets_path, JSON.pretty_generate(secrets), mode: "w", perm: 0o600)
+  end
+  secrets = JSON.parse(File.read(secrets_path))
+
+  transfer_key = ENV.fetch("TRANSFER_KEY", secrets.fetch("TRANSFER_KEY"))
+  ddns_key = ENV.fetch("DDNS_KEY", secrets.fetch("DDNS_KEY"))
+  bridge = ENV.fetch("IF_BRIDGE", "eno1")
+
+  config.vm.define "kea1" do |node|
+    node.vm.hostname = "KEA1"
+    node.vm.network "public_network", bridge: bridge, ip: "172.26.30.203", netmask: "255.255.0.0"
+    node.vm.network "private_network", ip: "192.168.10.2", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "KEA1"
+      vb.memory = "1024"
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    end
+    node.vm.provision "shell",
+      path: "provision/kea.sh",
+      args: ["kea1", "MASTER", "100"],
+      env: { "DDNS_KEY" => ddns_key }
+  end
+
+  config.vm.define "kea2" do |node|
+    node.vm.hostname = "KEA2"
+    node.vm.network "public_network", bridge: bridge, ip: "172.26.30.204", netmask: "255.255.0.0"
+    node.vm.network "private_network", ip: "192.168.10.3", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "KEA2"
+      vb.memory = "1024"
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    end
+    node.vm.provision "shell",
+      path: "provision/kea.sh",
+      args: ["kea2", "BACKUP", "90"],
+      env: { "DDNS_KEY" => ddns_key }
+  end
+
+  config.vm.define "dns1" do |node|
+    node.vm.hostname = "dns1"
+    node.vm.network "private_network", ip: "192.168.10.10", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "DNS1"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell",
+      path: "provision/dns1.sh",
+      env: { "TRANSFER_KEY" => transfer_key, "DDNS_KEY" => ddns_key }
+  end
+
+  config.vm.define "dns2" do |node|
+    node.vm.hostname = "dns2"
+    node.vm.network "private_network", ip: "192.168.10.11", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "DNS2"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell",
+      path: "provision/dns2.sh",
+      env: { "TRANSFER_KEY" => transfer_key }
+  end
+
+  config.vm.define "cliente1" do |node|
+    node.vm.hostname = "cliente1"
+    node.vm.network "private_network", type: "dhcp", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "CLIENTE1"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell", path: "provision/cliente.sh"
+  end
+end
