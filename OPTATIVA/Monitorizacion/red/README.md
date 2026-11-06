@@ -75,3 +75,104 @@ sudo tcptrack -i eth0 -r 2
 `tcptrack` muestra conexiones TCP, no sustituye a una captura general de
 paquetes como `tcpdump`. Sustituye `eth0` por una interfaz disponible en el
 sistema y monitoriza únicamente tráfico que estés autorizado a analizar.
+
+## Monitorización de red con `iptraf`
+
+En las distribuciones actuales, IPTraf suele instalarse como `iptraf-ng`.
+Instálalo con `sudo apt install iptraf-ng` en Debian/Ubuntu o con
+`sudo dnf install iptraf-ng` en Fedora. En algunas distribuciones el ejecutable
+puede llamarse `iptraf`.
+
+IPTraf ofrece una interfaz interactiva para consultar estadísticas de tráfico
+IP, actividad general de las interfaces y estadísticas de servicios TCP/UDP.
+Requiere permisos de administrador para capturar tráfico.
+
+| Opción | Función |
+| --- | --- |
+| `-i INTERFAZ` | Inicia el monitor de tráfico IP para la interfaz indicada. |
+| `-g` | Muestra estadísticas generales de las interfaces. |
+| `-d INTERFAZ` | Muestra estadísticas detalladas de la interfaz indicada. |
+| `-s INTERFAZ` | Muestra estadísticas de servicios TCP/UDP de la interfaz. |
+
+### Ejemplos
+
+```bash
+# Abrir el menú interactivo
+sudo iptraf-ng
+
+# Monitorizar el tráfico IP de una interfaz
+sudo iptraf-ng -i eth0
+
+# Consultar estadísticas detalladas de la interfaz
+sudo iptraf-ng -d eth0
+
+# Consultar estadísticas de servicios TCP/UDP
+sudo iptraf-ng -s eth0
+```
+
+Sustituye `eth0` por una interfaz disponible en el sistema y monitoriza
+únicamente tráfico que estés autorizado a analizar.
+
+## Monitorización del ancho de banda con `bmon`
+
+Instala `bmon` con `sudo apt install bmon` en Debian/Ubuntu o con
+`sudo dnf install bmon` en Fedora.
+
+`bmon` presenta en una interfaz interactiva las tasas de tráfico de entrada y
+salida de las interfaces de red. Permite observar el uso del ancho de banda
+en tiempo real, sin capturar ni mostrar el contenido de los paquetes.
+
+| Opción | Función |
+| --- | --- |
+| `-p INTERFACES` | Limita la vista a las interfaces indicadas, separadas por comas. |
+
+### Ejemplos
+
+```bash
+# Monitorizar todas las interfaces
+bmon
+
+# Monitorizar una interfaz concreta
+bmon -p eth0
+
+# Monitorizar dos interfaces
+bmon -p eth0,wlan0
+```
+
+Sustituye los nombres de ejemplo por las interfaces disponibles en el sistema.
+
+## Conexiones y sockets con `ss`
+
+`ss` suele venir incluido en el paquete `iproute2`. Si no está instalado,
+instálalo con `sudo apt install iproute2` en Debian/Ubuntu o con
+`sudo dnf install iproute` en Fedora.
+
+`ss` muestra sockets y conexiones de red. Permite consultar puertos en escucha,
+conexiones TCP o UDP y los procesos asociados. No suele necesitar permisos de
+administrador, aunque `sudo` permite ver información de todos los procesos.
+
+| Opción | Función |
+| --- | --- |
+| `-t` | Muestra sockets TCP. |
+| `-u` | Muestra sockets UDP. |
+| `-l` | Muestra sockets en escucha. |
+| `-n` | Muestra direcciones y puertos numéricos, sin resolver nombres. |
+| `-p` | Muestra el proceso asociado al socket; puede requerir `sudo`. |
+| `-a` | Muestra sockets en escucha y no escucha. |
+| `-4` / `-6` | Limita los resultados a IPv4 o IPv6. |
+
+### Ejemplos
+
+```bash
+# Mostrar todas las conexiones TCP
+ss -t -a
+
+# Mostrar puertos TCP en escucha con direcciones numéricas
+ss -t -l -n
+
+# Mostrar puertos TCP y UDP en escucha y los procesos asociados
+sudo ss -tulnp
+
+# Mostrar conexiones TCP establecidas
+ss -t -o state established
+```
