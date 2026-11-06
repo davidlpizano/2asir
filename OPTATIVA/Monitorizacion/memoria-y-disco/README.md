@@ -61,3 +61,64 @@ df -h .
 # Consultar el uso de inodos
 df -i
 ```
+
+## Uso de directorios y archivos con `du`
+
+`du` calcula el espacio ocupado por archivos y directorios. A diferencia de
+`df`, que informa del espacio de los sistemas de archivos, `du` permite
+localizar qué directorios están usando ese espacio.
+
+| Opción | Función |
+| --- | --- |
+| `-h` | Muestra los tamaños en unidades legibles. |
+| `-s` | Muestra únicamente el total de cada ruta indicada. |
+| `-a` | Incluye también los archivos, no solo los directorios. |
+| `--max-depth=N` | Limita el resultado a `N` niveles por debajo de la ruta. |
+
+### Ejemplos
+
+```bash
+# Mostrar el tamaño total del directorio actual
+du -sh .
+
+# Mostrar el tamaño de cada directorio del nivel actual
+du -h --max-depth=1 .
+
+# Mostrar el tamaño de un directorio concreto
+du -sh /var/log
+
+# Incluir archivos en el resultado
+du -ah .
+```
+
+## Actividad de disco con `iostat`
+
+`iostat`, incluido en el paquete `sysstat`, muestra estadísticas de actividad
+de la CPU y de los dispositivos de almacenamiento. A diferencia de `df` y
+`du`, permite observar operaciones de entrada y salida y su rendimiento a lo
+largo del tiempo.
+
+| Opción | Función |
+| --- | --- |
+| `-c` | Muestra estadísticas de uso de la CPU. |
+| `-d` | Muestra estadísticas de los dispositivos. |
+| `-x` | Añade estadísticas extendidas de los dispositivos. |
+| `-z` | Omite los dispositivos sin actividad durante el intervalo. |
+
+### Ejemplos
+
+```bash
+# Mostrar estadísticas de CPU y dispositivos
+iostat
+
+# Mostrar estadísticas extendidas de disco cada segundo, cinco informes
+iostat -dx 1 5
+
+# Mostrar estadísticas extendidas y omitir dispositivos inactivos
+iostat -dxz 1
+```
+
+En las estadísticas extendidas, `await` indica el tiempo medio de espera de
+las operaciones, en milisegundos, y `%util` el porcentaje de tiempo durante
+el que el dispositivo estuvo ocupado. El primer informe resume la actividad
+desde el arranque; los siguientes corresponden a los intervalos solicitados.
