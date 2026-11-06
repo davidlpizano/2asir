@@ -6,6 +6,9 @@ de archivos.
 
 ## Memoria RAM y swap con `free`
 
+En Debian/Ubuntu instala `free` con `sudo apt install procps`; en Fedora,
+`sudo dnf install procps-ng`. En muchas distribuciones ya viene instalado.
+
 `free` muestra un resumen de la memoria total, utilizada y disponible.
 La columna `available` estima cuánta memoria pueden usar las aplicaciones sin
 necesidad de recurrir a swap.
@@ -37,6 +40,9 @@ free -h -s 2 -c 5
 
 ## Espacio en disco con `df`
 
+`df` forma parte de GNU Coreutils. Si no está instalado, en Debian/Ubuntu usa
+`sudo apt install coreutils` y en Fedora `sudo dnf install coreutils`.
+
 `df` informa del espacio total, usado y disponible en los sistemas de archivos
 montados. Con `-h`, los tamaños se muestran en unidades legibles.
 
@@ -63,6 +69,9 @@ df -i
 ```
 
 ## Uso de directorios y archivos con `du`
+
+`du` forma parte de GNU Coreutils. Si no está instalado, en Debian/Ubuntu usa
+`sudo apt install coreutils` y en Fedora `sudo dnf install coreutils`.
 
 `du` calcula el espacio ocupado por archivos y directorios. A diferencia de
 `df`, que informa del espacio de los sistemas de archivos, `du` permite
@@ -93,6 +102,9 @@ du -ah .
 
 ## Actividad de disco con `iostat`
 
+Instala el paquete `sysstat`, que incluye `iostat`: en Debian/Ubuntu ejecuta
+`sudo apt install sysstat` y en Fedora `sudo dnf install sysstat`.
+
 `iostat`, incluido en el paquete `sysstat`, muestra estadísticas de actividad
 de la CPU y de los dispositivos de almacenamiento. A diferencia de `df` y
 `du`, permite observar operaciones de entrada y salida y su rendimiento a lo
@@ -118,7 +130,6 @@ iostat -dx 1 5
 iostat -dxz 1
 ```
 
-En las estadísticas extendidas, `await` indica el tiempo medio de espera de
-las operaciones, en milisegundos, y `%util` el porcentaje de tiempo durante
+En las estadísticas extendidas, `await` indica el tiempo medio de espera de las operaciones, en milisegundos, y `%util` el porcentaje de tiempo durante
 el que el dispositivo estuvo ocupado. El primer informe resume la actividad
 desde el arranque; los siguientes corresponden a los intervalos solicitados.
