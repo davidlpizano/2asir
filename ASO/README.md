@@ -6,7 +6,7 @@ Apuntes y prácticas de la asignatura de Administración de Sistemas Operativos 
 
 | Tema | Contenido |
 | --- | --- |
-| [Tema 2: Programación de tareas](tema2/README.md) | Programación de tareas con `cron`, `anacron`, timers y herramientas gráficas. |
+| [Tema 2: Programación de tareas](tema2/README.md) | Programación de tareas con `at`, `cron`, `anacron`, timers y herramientas gráficas. |
 
 ## Estado
 
