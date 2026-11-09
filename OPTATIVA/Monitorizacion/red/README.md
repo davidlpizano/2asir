@@ -171,7 +171,7 @@ ss -t -a
 ss -t -l -n
 
 # Mostrar puertos TCP y UDP en escucha y los procesos asociados
-sudo ss -tulnp
+sudo ss -plunt
 
 # Mostrar conexiones TCP establecidas
 ss -t -o state established
