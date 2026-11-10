@@ -1,15 +1,16 @@
-# ASO
+# Administración de Sistemas Operativos (ASO)
 
-Apuntes y prácticas de la asignatura de Administración de Sistemas Operativos (ASO).
+Esta asignatura trata la administración del sistema operativo, la automatización
+con scripts y la programación de tareas en entornos GNU/Linux.
 
 ## Contenidos
 
-| Tema | Contenido |
+| Tema | Enfoque |
 | --- | --- |
 | [Tema 0: Repaso de Linux y PowerShell](tema0/README.md) | Repaso de administración básica e intermedia en GNU/Linux y PowerShell. |
-| [Tema 1: Scripts de Linux](tema1/README.md) | Fundamentos de scripting en Bash: variables, argumentos, condiciones, bucles y funciones. |
-| [Tema 2: Programación de tareas](tema2/README.md) | Programación de tareas con `at`, `cron`, `anacron`, timers y herramientas gráficas. |
+| [Tema 1: Scripts de Linux](tema1/README.md) | Variables, argumentos, condiciones, bucles y funciones en Bash. |
+| [Tema 2: Programación de tareas](tema2/README.md) | `at`, `cron`, `anacron`, timers y herramientas de automatización. |
 
 ## Estado
 
-Los contenidos se irán completando durante la asignatura.
+El contenido se va completando según el desarrollo de la asignatura.
