@@ -1,29 +1,38 @@
-# Tema 1: Scripts de Linux
+# Tema 1: Lenguajes de scripting en sistemas operativos
 
 ## Índice
 
-- [1. Estructura y ejecución](#1-estructura-y-ejecución)
-- [2. Variables y argumentos](#2-variables-y-argumentos)
-- [3. Entrada, salida y códigos de retorno](#3-entrada-salida-y-códigos-de-retorno)
-- [4. Condiciones](#4-condiciones)
-- [5. Bucles](#5-bucles)
-- [6. Funciones](#6-funciones)
-- [7. Buenas prácticas](#7-buenas-prácticas)
-- [8. Ejercicios propuestos](#8-ejercicios-propuestos)
+- [1. Qué es un script](#1-qué-es-un-script)
+- [2. Creación, ejecución y depuración](#2-creación-ejecución-y-depuración)
+- [3. Salida y comillas](#3-salida-y-comillas)
+- [4. Variables y entrada](#4-variables-y-entrada)
+- [5. Argumentos y variables especiales](#5-argumentos-y-variables-especiales)
+- [6. Redirecciones y composición de órdenes](#6-redirecciones-y-composición-de-órdenes)
+- [7. Condiciones](#7-condiciones)
+- [8. Selección de opciones](#8-selección-de-opciones)
+- [9. Operaciones aritméticas](#9-operaciones-aritméticas)
+- [10. Bucles](#10-bucles)
+- [11. Funciones](#11-funciones)
+- [12. Códigos de salida y estructura segura](#12-códigos-de-salida-y-estructura-segura)
+- [13. Automatización de tareas administrativas](#13-automatización-de-tareas-administrativas)
+- [14. Menús con `dialog`](#14-menús-con-dialog)
+- [15. Ejercicios propuestos](#15-ejercicios-propuestos)
 
-## 1. Estructura y ejecución
+## 1. Qué es un script
 
-Un script de shell es un archivo de texto con comandos que la shell ejecuta en
-orden. En este tema se usa Bash. La primera línea selecciona el intérprete:
+Un script Bash es un fichero de texto con órdenes que el intérprete ejecuta
+secuencialmente. Permite automatizar tareas repetitivas del sistema operativo.
+La primera línea indica qué intérprete debe ejecutarlo:
 
 ```bash
 #!/usr/bin/env bash
 
-printf 'Hola, %s\n' "${USER:-usuario}"
+printf 'Hola, %s\n' "$USER"
 ```
 
-Guarda el archivo, por ejemplo, como `saludo.sh`. Se puede ejecutar pasando el
-archivo a Bash o concediéndole permiso de ejecución:
+La línea `#!` se llama *shebang*. También es habitual encontrar `#!/bin/bash`.
+Guarda el fichero con extensión `.sh` y ejecútalo con Bash o dale permiso de
+ejecución:
 
 ```console
 $ bash saludo.sh
@@ -31,77 +40,193 @@ $ chmod u+x saludo.sh
 $ ./saludo.sh
 ```
 
-La ruta `./` indica que el archivo está en el directorio actual. Comprueba los
-permisos y la ruta si la ejecución falla.
+`./` indica que el script está en el directorio actual. Para lanzarlo solo por
+su nombre, tendría que estar en un directorio de `PATH`. No es necesario mover
+scripts de prácticas a directorios del sistema ni darles permisos `777`.
 
-## 2. Variables y argumentos
+## 2. Creación, ejecución y depuración
 
-Asigna valores sin espacios alrededor de `=`. Usa comillas dobles al expandir
-variables para preservar espacios y evitar que el shell divida el valor en
-palabras:
+Un script legible suele incluir una cabecera breve con su propósito, autor o
+versión, y una indicación de uso. Divide las tareas en pasos claros y evita
+órdenes innecesarias.
+
+Antes de ejecutar un script, comprueba su sintaxis:
+
+```console
+$ bash -n script.sh
+```
+
+Para analizar su ejecución:
+
+```console
+$ bash -x script.sh argumento
+```
+
+`-x` muestra las órdenes y expansiones antes de ejecutarlas. También se puede
+activar temporalmente desde el propio script con `set -x` y desactivar con
+`set +x`. La opción `-v` muestra las líneas leídas por Bash; `-n` comprueba la
+sintaxis sin ejecutar las órdenes.
+
+Depurar implica predecir el resultado, comprobarlo y explicar las diferencias.
+Cuando algo falla, revisa primero la sintaxis, los valores de las variables,
+los argumentos y el código de salida de cada orden.
+
+## 3. Salida y comillas
+
+`printf` permite controlar el formato y los saltos de línea:
+
+```bash
+printf 'Usuario: %s\n' "$USER"
+printf 'Fichero: %s\nLíneas: %s\n' "$fichero" "$lineas"
+```
+
+`echo` sirve para mensajes sencillos, pero `printf` es preferible cuando el
+texto contiene variables, caracteres especiales o formato.
+
+Las comillas cambian cómo interpreta Bash el contenido:
+
+| Forma | Efecto |
+| --- | --- |
+| `'texto literal'` | Conserva literalmente el contenido; no expande variables. |
+| `"texto $variable"` | Expande variables y sustituciones, pero conserva el texto como una palabra. |
+| `$(orden)` | Ejecuta una orden y sustituye la expresión por su salida. |
+| `\` | Protege el carácter siguiente o permite continuar una orden en otra línea. |
+
+Ejemplo:
 
 ```bash
 nombre="Ana Pérez"
-directorio="/var/log"
-printf 'Usuario: %s\n' "$nombre"
+printf '%s\n' 'Hola, $nombre'
+printf 'Hola, %s\n' "$nombre"
+fecha=$(date '+%d/%m/%Y')
+printf 'Fecha: %s\n' "$fecha"
 ```
 
-Las variables de entorno se pueden exportar para que las reciban los procesos
-hijos:
+La primera línea imprime `$nombre` literalmente; la segunda imprime su valor.
+Usa comillas dobles al expandir variables, especialmente en rutas y argumentos:
+`"$fichero"` evita que los espacios dividan una ruta en varias palabras.
+
+## 4. Variables y entrada
+
+Asigna valores sin espacios alrededor del signo `=`:
 
 ```bash
-export MODO="prueba"
+nombre="Ana Pérez"
+numero=12
+directorio="/var/log"
 ```
 
-Los argumentos recibidos por el script se consultan con parámetros posicionales:
+Para utilizar el contenido de una variable, escribe `$nombre` o
+`${nombre}`. Las llaves delimitan el nombre cuando va seguido de más texto:
 
-| Expansión | Significado |
+```bash
+fichero="informe"
+printf '%s\n' "${fichero}.txt"
+```
+
+La sustitución de órdenes `$(...)` guarda su salida en una variable:
+
+```bash
+equipo=$(hostname)
+ahora=$(date '+%H:%M')
+```
+
+`read` obtiene datos de la entrada estándar. `-r` evita que las barras
+invertidas se interpreten como escapes y `-p` muestra una pregunta:
+
+```bash
+read -r -p 'Introduce tu nombre: ' nombre
+printf 'Hola, %s\n' "$nombre"
+```
+
+Las variables definidas dentro del script solo están disponibles en ese
+proceso. `export NOMBRE=valor` las convierte en variables de entorno que
+heredan los procesos hijos. Algunas variables de entorno frecuentes son
+`HOME`, `USER`, `PATH`, `PWD`, `SHELL` y `HOSTNAME`. `unset nombre` elimina
+una variable.
+
+## 5. Argumentos y variables especiales
+
+Los valores escritos después del nombre del script son sus argumentos
+posicionales:
+
+| Variable | Significado |
 | --- | --- |
 | `$0` | Nombre o ruta con la que se invocó el script. |
 | `$1`, `$2`, ... | Primer argumento, segundo argumento, etc. |
-| `$#` | Número de argumentos. |
-| `"$@"` | Todos los argumentos, conservando cada uno por separado. |
-| `$?` | Código de retorno del último comando. |
+| `$#` | Número de argumentos recibidos. |
+| `"$@"` | Todos los argumentos, cada uno conservado por separado. |
+| `"$*"` | Todos los argumentos juntos en una sola palabra. |
+| `$?` | Código de salida de la última orden ejecutada. |
+| `$$` | PID del proceso de Bash actual. |
+| `$!` | PID de la última orden ejecutada en segundo plano. |
 
-Ejemplo de validación de argumentos:
+Valida el número de argumentos antes de usarlos:
 
 ```bash
-#!/usr/bin/env bash
-
 if [[ $# -ne 1 ]]; then
-    printf 'Uso: %s <directorio>\n' "$0" >&2
+    printf 'Uso: %s <fichero>\n' "$0" >&2
     exit 2
 fi
 
-directorio=$1
-printf 'Directorio indicado: %s\n' "$directorio"
+fichero=$1
 ```
 
-## 3. Entrada, salida y códigos de retorno
-
-`printf` permite dar formato a la salida. `read` lee una línea introducida por
-el usuario. Los códigos de retorno indican si una orden terminó correctamente:
-por convención, `0` significa éxito y un valor distinto de cero indica error.
+Usa `"$@"` para recorrer argumentos que puedan contener espacios:
 
 ```bash
-read -r -p "Nombre: " nombre
-printf 'Hola, %s\n' "$nombre"
-
-if [[ -f "$1" ]]; then
-    printf 'El archivo existe\n'
-else
-    printf 'No existe o no es un archivo regular\n' >&2
-    exit 1
-fi
+for argumento in "$@"; do
+    printf 'Argumento: %s\n' "$argumento"
+done
 ```
 
-Usa `>&2` para enviar mensajes de error a la salida estándar de error. `exit`
-termina el script y devuelve el código indicado.
+## 6. Redirecciones y composición de órdenes
 
-## 4. Condiciones
+Los procesos disponen de tres canales habituales:
 
-`if` ejecuta bloques según el estado de una condición. En Bash, `[[ ... ]]`
-permite comprobar cadenas, números y rutas:
+| Descriptor | Nombre | Uso |
+| --- | --- | --- |
+| `0` | Entrada estándar (`stdin`) | Datos que recibe la orden. |
+| `1` | Salida estándar (`stdout`) | Resultado normal. |
+| `2` | Salida de error (`stderr`) | Avisos y errores. |
+
+Redirecciones frecuentes:
+
+| Sintaxis | Efecto |
+| --- | --- |
+| `orden > salida.txt` | Guarda la salida estándar y sobrescribe el fichero. |
+| `orden >> salida.txt` | Añade la salida estándar al final del fichero. |
+| `orden < entrada.txt` | Lee la entrada desde un fichero. |
+| `orden 2> errores.txt` | Guarda los errores y sobrescribe el fichero. |
+| `orden 2>> errores.txt` | Añade los errores al fichero. |
+| `orden > salida.txt 2>&1` | Envía ambos canales al mismo destino. |
+| `orden > /dev/null 2>&1` | Descarta la salida normal y los errores. |
+
+El orden de las redirecciones importa. `2>&1` dirige el descriptor 2 al destino
+que tenga en ese momento el descriptor 1.
+
+La tubería `|` conecta la salida de una orden con la entrada de otra:
+
+```bash
+grep -i 'error' registro.log | wc -l
+```
+
+Otros operadores útiles:
+
+- `orden1 && orden2`: ejecuta `orden2` solo si `orden1` termina correctamente.
+- `orden1 || orden2`: ejecuta `orden2` solo si `orden1` falla.
+- `orden1 ; orden2`: ejecuta ambas órdenes en secuencia, sin condicionar la segunda.
+- `(...)`: ejecuta las órdenes agrupadas en un subshell.
+- `{ ...; }`: agrupa órdenes en el shell actual; requiere espacios y `;` antes de `}`.
+
+El estado de una tubería es normalmente el de la última orden. En Bash,
+`set -o pipefail` hace que la tubería falle si falla alguna de sus órdenes.
+
+## 7. Condiciones
+
+El `if` ejecuta bloques según el estado de una orden o prueba. En Bash, el
+código `0` significa que la condición se cumple; un valor distinto de `0`
+significa que no se cumple o que se produjo un error.
 
 ```bash
 if [[ -d "$directorio" ]]; then
@@ -113,26 +238,81 @@ else
 fi
 ```
 
-Comprobaciones frecuentes:
+`[[ ... ]]` es una construcción de Bash para comprobar cadenas, números y
+rutas. También existe `[ ... ]` (el comando `test`); en ambos casos los
+espacios alrededor de los corchetes son obligatorios.
+
+Pruebas frecuentes:
 
 | Prueba | Significado |
 | --- | --- |
 | `-e ruta` | La ruta existe. |
-| `-f ruta` | Es un archivo regular. |
+| `-f ruta` | Es un fichero regular. |
 | `-d ruta` | Es un directorio. |
+| `-L ruta` | Es un enlace simbólico. |
 | `-r ruta` | Se puede leer. |
 | `-w ruta` | Se puede escribir. |
-| `-x ruta` | Se puede ejecutar o recorrer. |
-| `cadena1 == cadena2` | Las cadenas son iguales. |
-| `numero1 -eq numero2` | Los números son iguales. |
+| `-x ruta` | Se puede ejecutar o, si es un directorio, recorrer. |
+| `-s ruta` | Existe y tiene tamaño mayor que cero. |
 
-Para seleccionar entre varias opciones según el valor de una expresión, usa
-`case`:
+Para clasificar enlaces simbólicos, comprueba `-L` antes de otras pruebas:
+
+```bash
+if [[ -L "$ruta" ]]; then
+    printf 'Enlace simbólico\n'
+elif [[ -f "$ruta" ]]; then
+    printf 'Fichero regular\n'
+elif [[ -d "$ruta" ]]; then
+    printf 'Directorio\n'
+elif [[ -e "$ruta" ]]; then
+    printf 'Existe y es de otro tipo\n'
+else
+    printf 'No existe\n'
+fi
+```
+
+Comparaciones habituales:
+
+| Tipo | Operadores |
+| --- | --- |
+| Cadenas | `==`, `!=`, `-z` (vacía), `-n` (no vacía) |
+| Números enteros | `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge` |
+
+Valida que un dato sea numérico antes de compararlo como número:
+
+```bash
+if [[ ! $limite =~ ^[0-9]+$ ]] || (( limite < 1 || limite > 100 )); then
+    printf 'El límite debe ser un entero entre 1 y 100\n' >&2
+    exit 2
+fi
+```
+
+Una orden también puede ser directamente la condición:
+
+```bash
+if grep -q '^root:' /etc/passwd; then
+    printf 'La cuenta root aparece en la base de usuarios\n'
+fi
+```
+
+`grep -q` no imprime coincidencias: su código de salida indica si encontró
+alguna.
+
+## 8. Selección de opciones
+
+### `case`
+
+`case` compara un valor con patrones. Es útil para opciones de línea de
+comandos y menús:
 
 ```bash
 case "${1:-}" in
-    iniciar) printf 'Iniciando\n' ;;
-    detener) printf 'Deteniendo\n' ;;
+    iniciar)
+        printf 'Iniciando\n'
+        ;;
+    detener)
+        printf 'Deteniendo\n'
+        ;;
     *)
         printf 'Uso: %s {iniciar|detener}\n' "$0" >&2
         exit 2
@@ -140,79 +320,286 @@ case "${1:-}" in
 esac
 ```
 
-## 5. Bucles
+En cada alternativa, `;;` termina el bloque y `*)` representa cualquier otro
+valor. Los patrones pueden incluir `|` para aceptar varias opciones, por
+ejemplo `s|S|si|SI)`.
 
-`for` recorre una lista de valores; `while` repite mientras una orden o
-condición tenga éxito:
+### Menús con `select`
+
+`select` presenta una lista numerada y repite el menú. La elección se guarda
+en la variable indicada; la entrada escrita por el usuario queda en `REPLY`.
+`PS3` permite personalizar el indicador:
 
 ```bash
-for archivo in ./*.txt; do
-    [[ -e "$archivo" ]] || continue
-    printf 'Encontrado: %s\n' "$archivo"
+PS3='Elige una opción: '
+select opcion in 'Mostrar fecha' 'Salir'; do
+    case $REPLY in
+        1) date ;;
+        2) break ;;
+        *) printf 'Opción incorrecta\n' ;;
+    esac
 done
 ```
 
-La comprobación evita procesar literalmente `./*.txt` cuando no hay archivos
-que coincidan con el patrón.
+Para menús con más control sobre el formato, se puede combinar `while`,
+`read` y `case`. Antes de borrar o modificar información, solicita
+confirmación y comprueba la respuesta.
+
+## 9. Operaciones aritméticas
+
+Bash realiza operaciones con enteros mediante `$((...))` o `((...))`:
 
 ```bash
-while IFS= read -r linea; do
+base=8
+incremento=3
+total=$((base + incremento))
+resto=$((total % 2))
+printf 'Total: %s; resto: %s\n' "$total" "$resto"
+```
+
+Operadores habituales: `+`, `-`, `*`, `/` y `%` (resto). Para expresar una
+operación, conserva los espacios y usa paréntesis cuando ayuden a aclarar el
+orden. La división de Bash es entera: no conserva decimales.
+
+Para decimales se puede usar `bc`, si está instalado:
+
+```bash
+resultado=$(printf '%s\n' 'scale=2; 20.1 / 2.5' | bc -l)
+```
+
+## 10. Bucles
+
+### `for`
+
+`for` ejecuta el bloque una vez por cada valor:
+
+```bash
+for nombre in Ana Luis Marta; do
+    printf 'Hola, %s\n' "$nombre"
+done
+```
+
+También se usa para recorrer ficheros que coinciden con un patrón:
+
+```bash
+for fichero in ./*.txt; do
+    [[ -e "$fichero" ]] || continue
+    printf 'Encontrado: %s\n' "$fichero"
+done
+```
+
+La comprobación evita procesar literalmente `./*.txt` si no hay coincidencias.
+`continue` pasa a la siguiente iteración y `break` termina el bucle.
+
+### `while`
+
+`while` repite el bloque mientras la condición termine correctamente:
+
+```bash
+contador=1
+while (( contador <= 5 )); do
+    printf '%s\n' "$contador"
+    contador=$((contador + 1))
+done
+```
+
+Al procesar un fichero línea a línea, usa `IFS=` y `read -r` para conservar
+espacios y barras invertidas:
+
+```bash
+while IFS= read -r linea || [[ -n $linea ]]; do
     printf 'Línea: %s\n' "$linea"
 done < entrada.txt
 ```
 
-`IFS=` junto con `read -r` conserva espacios iniciales y barras invertidas en
-cada línea.
+La condición adicional procesa también la última línea si el fichero no acaba
+en salto de línea. La redirección al final evita que el bucle se ejecute en un
+subshell y permite conservar contadores modificados dentro de él.
 
-## 6. Funciones
+### `until`
 
-Las funciones agrupan órdenes reutilizables. Los argumentos de la función usan
-los mismos parámetros posicionales (`$1`, `$2`, ...); `return` devuelve un
-código de estado, no un texto:
+`until` repite mientras la condición falle y termina cuando tiene éxito:
+
+```bash
+respuesta=''
+until [[ $respuesta == 'salir' ]]; do
+    read -r -p 'Escribe salir para terminar: ' respuesta
+done
+```
+
+Comprueba siempre que una variable de control cambia dentro del bucle para
+evitar iteraciones infinitas.
+
+## 11. Funciones
+
+Una función agrupa instrucciones para reutilizarlas. Sus argumentos se reciben
+como `$1`, `$2`, etc. y son independientes de los argumentos del script que la
+llama:
 
 ```bash
 mostrar_uso() {
-    printf 'Uso: %s <archivo>\n' "$0" >&2
+    printf 'Uso: %s <fichero>\n' "$0" >&2
 }
 
-archivo_legible() {
-    [[ -f "$1" && -r "$1" ]]
+fichero_legible() {
+    local ruta=$1
+    [[ -f "$ruta" && -r "$ruta" ]]
 }
 
-if archivo_legible "${1:-}"; then
-    printf 'Archivo disponible\n'
+if fichero_legible "${1:-}"; then
+    printf 'El fichero se puede leer\n'
 else
     mostrar_uso
     exit 1
 fi
 ```
 
-Para producir texto desde una función, usa `printf` y captura su salida con
-sustitución de comandos: `resultado=$(mi_funcion)`.
+`local` limita una variable a la función. Cada alternativa de un menú puede
+implementarse en una función distinta para que el flujo principal sea fácil de
+leer.
 
-## 7. Buenas prácticas
+`return` termina una función y devuelve un código de estado; no devuelve
+texto. Para comunicar un resultado lógico, deja que la última orden de la
+función proporcione su estado, o usa `return 0` para éxito y un valor distinto
+de cero para fallo. Para producir texto, usa `printf` y captura su salida:
 
-- Cita las expansiones de variables: `"$variable"` y `"$@"`.
-- Valida argumentos y rutas antes de actuar sobre ellas.
-- Usa rutas explícitas y evita asumir cuál es el directorio de trabajo.
-- Comprueba códigos de retorno y muestra errores por la salida de error.
-- Prueba primero con datos de ejemplo y evita ejecutar scripts con privilegios
-  administrativos si no son necesarios.
-- `set -euo pipefail` puede ayudar a detectar errores, variables no definidas
-  y fallos en tuberías, pero cambia el comportamiento ante ciertos estados.
-  Úsalo conociendo sus efectos y comprueba especialmente las condiciones,
-  sustituciones y comandos cuyo fallo sea esperado.
-- Pasa el script por `bash -n script.sh` para comprobar errores de sintaxis
-  antes de ejecutarlo.
+```bash
+obtener_fecha() {
+    date '+%Y-%m-%d'
+}
 
-## 8. Ejercicios propuestos
+fecha=$(obtener_fecha)
+```
 
-1. Crea un script que reciba una ruta e indique si es archivo, directorio o no
-   existe.
-2. Amplía el script para comprobar también si el usuario puede leer y escribir
-   la ruta.
-3. Escribe un script que reciba varios nombres de archivo y muestre los que
-   existen.
-4. Lee un archivo línea a línea y cuenta cuántas líneas no vacías contiene.
-5. Crea una función que valide que se ha recibido exactamente un argumento y
-   reutilízala en un script con varias opciones.
+## 12. Códigos de salida y estructura segura
+
+Cada orden y script termina con un código de salida:
+
+- `0`: éxito.
+- Distinto de `0`: fallo o situación no satisfactoria.
+- `$?`: código de la última orden ejecutada; guárdalo o compruébalo antes de
+  ejecutar otra orden, porque su valor cambia.
+
+`exit n` termina un script con el código indicado. `return n` termina una
+función. Es habitual reservar códigos distintos para errores diferentes, por
+ejemplo, argumentos incorrectos, ruta inválida y fallo de una operación.
+
+Un esqueleto de validación:
+
+```bash
+#!/usr/bin/env bash
+
+if [[ $# -ne 1 ]]; then
+    printf 'Uso: %s <fichero>\n' "$0" >&2
+    exit 2
+fi
+
+fichero=$1
+if [[ ! -f "$fichero" ]]; then
+    printf 'Error: no es un fichero regular: %s\n' "$fichero" >&2
+    exit 1
+fi
+if [[ ! -r "$fichero" ]]; then
+    printf 'Error: no se puede leer: %s\n' "$fichero" >&2
+    exit 1
+fi
+
+lineas=$(wc -l < "$fichero") || {
+    printf 'Error al contar las líneas\n' >&2
+    exit 1
+}
+printf 'Líneas: %s\n' "$lineas"
+exit 0
+```
+
+`>&2` envía el mensaje al canal de error. No muestres un mensaje de éxito ni
+devuelvas `0` antes de comprobar que la operación principal terminó bien.
+
+`set -euo pipefail` puede ayudar a detectar ciertos fallos, pero modifica el
+comportamiento del script. No sustituye a la validación ni a la comprobación
+explícita de órdenes: estudia sus efectos, sobre todo en condiciones,
+funciones, sustituciones y tuberías, antes de usarlo.
+
+## 13. Automatización de tareas administrativas
+
+Los boletines aplican estas construcciones a consultas del sistema, análisis
+de ficheros, menús, usuarios, almacenamiento, recogida de prácticas y copias
+de seguridad. Al automatizar tareas administrativas:
+
+1. Valida argumentos, rutas, tipos de fichero y permisos antes de actuar.
+2. Usa comillas en rutas y expansiones; no des por supuesto el directorio de
+   trabajo actual.
+3. Comprueba el código de salida de operaciones como `cp`, `mkdir` y `tar`.
+4. Envía los errores a `stderr`, registra las incidencias y resume los
+   resultados de forma veraz.
+5. Antes de sobrescribir, borrar o modificar cuentas, informa de lo que se
+   afectará y solicita confirmación cuando proceda.
+6. Comprueba privilegios solo cuando la operación los requiere. Prueba las
+   tareas de administración en un entorno de prácticas y con datos de prueba.
+
+Para leer registros separados por dos puntos, como `/etc/passwd`, asigna cada
+campo a una variable:
+
+```bash
+while IFS=: read -r usuario clave uid gid descripcion home shell; do
+    printf '%s: UID=%s, HOME=%s\n' "$usuario" "$uid" "$home"
+done < /etc/passwd
+```
+
+No guardes contraseñas en texto plano ni las incluyas en scripts o registros.
+Las prácticas de creación de usuarios deben realizarse en máquinas de
+laboratorio y con un método autorizado para establecer credenciales.
+
+Para analizar ocupación, `df -P` ofrece una salida adecuada para procesar por
+líneas. Elimina el encabezado antes de leer los campos y valida el límite
+numérico antes de compararlo. Recuerda que las unidades de espacio deben ser
+coherentes: comprueba las unidades que devuelve cada opción de `df`.
+
+Para copias de seguridad, valida el origen y el destino, crea el destino solo
+si corresponde, decide explícitamente qué hacer si la copia ya existe y
+comprueba el resultado de `tar` antes de informar de éxito. En la rotación,
+verifica que la selección conserva las copias más recientes y que cualquier
+borrado solo afecta a los ficheros esperados.
+
+## 14. Menús con `dialog`
+
+`dialog` es una herramienta opcional para crear cuadros y menús en terminal.
+No forma parte de Bash y debe estar instalada en el sistema. Puede mostrar
+mensajes, pedir datos y presentar opciones:
+
+```console
+$ dialog --msgbox "Proceso terminado" 8 40
+$ dialog --yesno "¿Continuar?" 8 40
+```
+
+El código de salida permite distinguir, por ejemplo, entre aceptar y cancelar.
+Los datos introducidos en cuadros como `--inputbox` se escriben normalmente en
+`stderr`; redirígelos a un fichero o usa la opción `--stdout` si quieres
+capturarlos por la salida estándar. Comprueba siempre el estado devuelto antes
+de continuar.
+
+## 15. Ejercicios propuestos
+
+1. Muestra un informe de sesión con usuario, UID, directorio personal, shell,
+   equipo, fecha y directorio actual.
+2. Crea un clasificador que reciba una ruta e indique si no existe, es un
+   fichero regular, un directorio o un enlace simbólico.
+3. Amplía el clasificador para validar argumentos y permisos y, si recibe un
+   fichero, mostrar líneas, palabras y tamaño.
+4. Predice la salida de pequeños scripts con variables, condiciones, bucles y
+   funciones; después ejecútalos y explica cualquier diferencia.
+5. Procesa un fichero línea a línea, cuenta líneas vacías y no vacías y envía
+   los errores a `stderr`.
+6. Recorre los ficheros regulares de un directorio y cuenta sus extensiones,
+   sin contabilizar los subdirectorios.
+7. Diseña un menú repetitivo con una función por opción, tratamiento de
+   opciones incorrectas y confirmación antes de salir o modificar datos.
+8. Analiza el espacio de varios sistemas de ficheros a partir de un umbral
+   validado y devuelve un código de salida distinto si hay alertas.
+9. Diseña una copia de seguridad que registre inicio, resultado y errores.
+   Prueba rutas con espacios, origen inexistente, destino no escribible y
+   copia ya existente en un directorio temporal.
+10. Corrige scripts con errores de sintaxis, comillas, argumentos, búsquedas
+    parciales, contadores, condiciones de `ping`, bucles infinitos y selección
+    de ficheros antiguos. Predice primero el comportamiento y no ejecutes
+    scripts que puedan borrar o modificar datos reales.
