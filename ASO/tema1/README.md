@@ -17,6 +17,9 @@
 - [13. Automatización de tareas administrativas](#13-automatización-de-tareas-administrativas)
 - [14. Menús con `dialog`](#14-menús-con-dialog)
 - [15. Ejercicios propuestos](#15-ejercicios-propuestos)
+- [16. Errores frecuentes](#16-errores-frecuentes)
+- [17. Lista de comprobación](#17-lista-de-comprobación)
+- [Material complementario](#material-complementario)
 
 ## 1. Qué es un script
 
@@ -582,26 +585,144 @@ de continuar.
 
 ## 15. Ejercicios propuestos
 
+Hay ejercicios ordenados por dificultad, con soluciones explicadas, en
+[ejercicios.md](./ejercicios.md). Como práctica adicional, puedes trabajar
+estos retos sin consultar primero las soluciones:
+
 1. Muestra un informe de sesión con usuario, UID, directorio personal, shell,
    equipo, fecha y directorio actual.
 2. Crea un clasificador que reciba una ruta e indique si no existe, es un
    fichero regular, un directorio o un enlace simbólico.
 3. Amplía el clasificador para validar argumentos y permisos y, si recibe un
    fichero, mostrar líneas, palabras y tamaño.
-4. Predice la salida de pequeños scripts con variables, condiciones, bucles y
-   funciones; después ejecútalos y explica cualquier diferencia.
-5. Procesa un fichero línea a línea, cuenta líneas vacías y no vacías y envía
-   los errores a `stderr`.
-6. Recorre los ficheros regulares de un directorio y cuenta sus extensiones,
-   sin contabilizar los subdirectorios.
-7. Diseña un menú repetitivo con una función por opción, tratamiento de
-   opciones incorrectas y confirmación antes de salir o modificar datos.
-8. Analiza el espacio de varios sistemas de ficheros a partir de un umbral
+4. Diseña un menú repetitivo con una función por opción y confirmación antes
+   de salir o modificar datos.
+5. Analiza el espacio de varios sistemas de ficheros a partir de un umbral
    validado y devuelve un código de salida distinto si hay alertas.
-9. Diseña una copia de seguridad que registre inicio, resultado y errores.
-   Prueba rutas con espacios, origen inexistente, destino no escribible y
-   copia ya existente en un directorio temporal.
-10. Corrige scripts con errores de sintaxis, comillas, argumentos, búsquedas
-    parciales, contadores, condiciones de `ping`, bucles infinitos y selección
-    de ficheros antiguos. Predice primero el comportamiento y no ejecutes
-    scripts que puedan borrar o modificar datos reales.
+6. Diseña una copia de seguridad y pruébala con datos temporales, rutas con
+   espacios, origen inexistente y copia ya existente. Comprueba qué ficheros
+   conserva la rotación antes de permitir cualquier borrado.
+
+## 16. Errores frecuentes
+
+### Olvidar los espacios en `[ ]`
+
+Los corchetes de `test` son parte de una orden y deben separarse de sus
+argumentos:
+
+```bash
+# Incorrecto
+if [ "$numero" -gt10 ]; then
+    echo "Mayor que diez"
+fi
+
+# Correcto
+if [ "$numero" -gt 10 ]; then
+    echo "Mayor que diez"
+fi
+```
+
+### Usar variables sin comillas
+
+Sin comillas, Bash puede dividir un valor por espacios y expandir caracteres
+comodín. Cita variables que contienen rutas o texto:
+
+```bash
+# Puede fallar si la ruta contiene espacios
+if [[ -f $fichero ]]; then
+    cat $fichero
+fi
+
+# Conserva la ruta como un solo argumento
+if [[ -f "$fichero" ]]; then
+    cat "$fichero"
+fi
+```
+
+### No comprobar los argumentos
+
+Acceder a `$1` no garantiza que el usuario haya proporcionado un argumento.
+Comprueba primero `$#` y muestra el uso por `stderr` si no coincide con lo
+esperado:
+
+```bash
+if [[ $# -ne 1 ]]; then
+    echo "Uso: $0 <fichero>" >&2
+    exit 2
+fi
+```
+
+### Confundir el estado de una orden con su salida
+
+`$?` guarda el código de salida de la última orden; no su texto. Compruébalo
+inmediatamente, porque otra orden lo cambia. En una condición, es más claro
+comprobar directamente la orden:
+
+```bash
+if grep -q '^root:' /etc/passwd; then
+    echo "Se ha encontrado root"
+else
+    echo "No se ha encontrado root"
+fi
+```
+
+### No actualizar la variable de control de un bucle
+
+Un bucle `while` puede no terminar nunca si la condición sigue siendo cierta.
+Actualiza el contador en cada iteración:
+
+```bash
+numero=1
+while [[ $numero -le 3 ]]; do
+    echo "$numero"
+    numero=$((numero + 1))
+done
+```
+
+### Contar el contenido en vez de acumularlo
+
+Si en cada iteración asignas el nuevo valor al total, se pierde el resultado
+anterior. Para contar, incrementa el acumulador:
+
+```bash
+total=0
+for nombre in Ana Luis Marta; do
+    total=$((total + 1))
+done
+echo "Total: $total"
+```
+
+### Suponer que una copia o un borrado siempre funciona
+
+Que `cp`, `tar` o `rm` no produzcan el resultado esperado debe reflejarse en el
+código de salida y en el mensaje. Valida las rutas antes de actuar y comprueba
+el estado de la operación antes de informar de éxito. Practica siempre sobre
+ficheros temporales, no sobre datos del sistema.
+
+## 17. Lista de comprobación
+
+Antes de entregar un script, comprueba cada punto que corresponda:
+
+- [ ] Empieza con `#!/bin/bash` y declara para qué sirve y cómo se usa.
+- [ ] Comprueba que se recibe el número de argumentos esperado.
+- [ ] Maneja argumentos vacíos y rutas con espacios.
+- [ ] Cita las expansiones de variables, especialmente cuando son rutas.
+- [ ] Comprueba que las rutas existen, son del tipo esperado y tienen los
+  permisos necesarios.
+- [ ] Valida números y opciones antes de compararlos o utilizarlos.
+- [ ] Cada bucle actualiza su condición y puede terminar.
+- [ ] Las tareas repetidas están separadas en funciones con nombres claros.
+- [ ] Los errores van a `stderr` y el código de salida indica el resultado.
+- [ ] El mensaje final solo afirma resultados que se han comprobado.
+- [ ] Las operaciones que sobrescriben, borran o cambian cuentas se revisan y
+  requieren confirmación cuando corresponde.
+- [ ] `bash -n script.sh` termina sin errores de sintaxis.
+- [ ] Prueba casos válidos, argumentos incorrectos, rutas inexistentes y
+  espacios en las rutas con datos de práctica.
+
+## Material complementario
+
+- [Chuleta de Bash](./chuleta.md): referencia breve de comandos y estructuras
+  del tema.
+- [Ejercicios de Bash](./ejercicios.md): prácticas progresivas con soluciones
+  explicadas.
