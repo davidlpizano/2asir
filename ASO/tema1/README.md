@@ -25,9 +25,9 @@ secuencialmente. Permite automatizar tareas repetitivas del sistema operativo.
 La primera línea indica qué intérprete debe ejecutarlo:
 
 ```bash
-#!/usr/bin/env bash
+#!/bin/bash
 
-printf 'Hola, %s\n' "$USER"
+echo "Hola, $USER"
 ```
 
 La línea `#!` se llama *shebang*. También es habitual encontrar `#!/bin/bash`.
@@ -73,15 +73,16 @@ los argumentos y el código de salida de cada orden.
 
 ## 3. Salida y comillas
 
-`printf` permite controlar el formato y los saltos de línea:
+`echo` muestra texto y añade un salto de línea:
 
 ```bash
-printf 'Usuario: %s\n' "$USER"
-printf 'Fichero: %s\nLíneas: %s\n' "$fichero" "$lineas"
+echo "Usuario: $USER"
+echo "Fichero: $fichero"
+echo "Líneas: $lineas"
 ```
 
-`echo` sirve para mensajes sencillos, pero `printf` es preferible cuando el
-texto contiene variables, caracteres especiales o formato.
+Utiliza comillas dobles para mostrar variables y conservar los espacios de su
+contenido.
 
 Las comillas cambian cómo interpreta Bash el contenido:
 
@@ -96,10 +97,10 @@ Ejemplo:
 
 ```bash
 nombre="Ana Pérez"
-printf '%s\n' 'Hola, $nombre'
-printf 'Hola, %s\n' "$nombre"
+echo 'Hola, $nombre'
+echo "Hola, $nombre"
 fecha=$(date '+%d/%m/%Y')
-printf 'Fecha: %s\n' "$fecha"
+echo "Fecha: $fecha"
 ```
 
 La primera línea imprime `$nombre` literalmente; la segunda imprime su valor.
@@ -121,7 +122,7 @@ Para utilizar el contenido de una variable, escribe `$nombre` o
 
 ```bash
 fichero="informe"
-printf '%s\n' "${fichero}.txt"
+echo "${fichero}.txt"
 ```
 
 La sustitución de órdenes `$(...)` guarda su salida en una variable:
@@ -136,7 +137,7 @@ invertidas se interpreten como escapes y `-p` muestra una pregunta:
 
 ```bash
 read -r -p 'Introduce tu nombre: ' nombre
-printf 'Hola, %s\n' "$nombre"
+echo "Hola, $nombre"
 ```
 
 Las variables definidas dentro del script solo están disponibles en ese
@@ -165,7 +166,7 @@ Valida el número de argumentos antes de usarlos:
 
 ```bash
 if [[ $# -ne 1 ]]; then
-    printf 'Uso: %s <fichero>\n' "$0" >&2
+    echo "Uso: $0 <fichero>" >&2
     exit 2
 fi
 
@@ -176,7 +177,7 @@ Usa `"$@"` para recorrer argumentos que puedan contener espacios:
 
 ```bash
 for argumento in "$@"; do
-    printf 'Argumento: %s\n' "$argumento"
+    echo "Argumento: $argumento"
 done
 ```
 
@@ -230,11 +231,11 @@ significa que no se cumple o que se produjo un error.
 
 ```bash
 if [[ -d "$directorio" ]]; then
-    printf 'Es un directorio\n'
+    echo "Es un directorio"
 elif [[ -e "$directorio" ]]; then
-    printf 'Existe, pero no es un directorio\n'
+    echo "Existe, pero no es un directorio"
 else
-    printf 'No existe\n'
+    echo "No existe"
 fi
 ```
 
@@ -259,15 +260,15 @@ Para clasificar enlaces simbólicos, comprueba `-L` antes de otras pruebas:
 
 ```bash
 if [[ -L "$ruta" ]]; then
-    printf 'Enlace simbólico\n'
+    echo "Enlace simbólico"
 elif [[ -f "$ruta" ]]; then
-    printf 'Fichero regular\n'
+    echo "Fichero regular"
 elif [[ -d "$ruta" ]]; then
-    printf 'Directorio\n'
+    echo "Directorio"
 elif [[ -e "$ruta" ]]; then
-    printf 'Existe y es de otro tipo\n'
+    echo "Existe y es de otro tipo"
 else
-    printf 'No existe\n'
+    echo "No existe"
 fi
 ```
 
@@ -282,7 +283,7 @@ Valida que un dato sea numérico antes de compararlo como número:
 
 ```bash
 if [[ ! $limite =~ ^[0-9]+$ ]] || (( limite < 1 || limite > 100 )); then
-    printf 'El límite debe ser un entero entre 1 y 100\n' >&2
+    echo "El límite debe ser un entero entre 1 y 100" >&2
     exit 2
 fi
 ```
@@ -291,7 +292,7 @@ Una orden también puede ser directamente la condición:
 
 ```bash
 if grep -q '^root:' /etc/passwd; then
-    printf 'La cuenta root aparece en la base de usuarios\n'
+    echo "La cuenta root aparece en la base de usuarios"
 fi
 ```
 
@@ -308,13 +309,13 @@ comandos y menús:
 ```bash
 case "${1:-}" in
     iniciar)
-        printf 'Iniciando\n'
+        echo "Iniciando"
         ;;
     detener)
-        printf 'Deteniendo\n'
+        echo "Deteniendo"
         ;;
     *)
-        printf 'Uso: %s {iniciar|detener}\n' "$0" >&2
+        echo "Uso: $0 {iniciar|detener}" >&2
         exit 2
         ;;
 esac
@@ -336,7 +337,7 @@ select opcion in 'Mostrar fecha' 'Salir'; do
     case $REPLY in
         1) date ;;
         2) break ;;
-        *) printf 'Opción incorrecta\n' ;;
+        *) echo "Opción incorrecta" ;;
     esac
 done
 ```
@@ -354,7 +355,7 @@ base=8
 incremento=3
 total=$((base + incremento))
 resto=$((total % 2))
-printf 'Total: %s; resto: %s\n' "$total" "$resto"
+echo "Total: $total; resto: $resto"
 ```
 
 Operadores habituales: `+`, `-`, `*`, `/` y `%` (resto). Para expresar una
@@ -364,7 +365,7 @@ orden. La división de Bash es entera: no conserva decimales.
 Para decimales se puede usar `bc`, si está instalado:
 
 ```bash
-resultado=$(printf '%s\n' 'scale=2; 20.1 / 2.5' | bc -l)
+resultado=$(echo 'scale=2; 20.1 / 2.5' | bc -l)
 ```
 
 ## 10. Bucles
@@ -375,7 +376,7 @@ resultado=$(printf '%s\n' 'scale=2; 20.1 / 2.5' | bc -l)
 
 ```bash
 for nombre in Ana Luis Marta; do
-    printf 'Hola, %s\n' "$nombre"
+    echo "Hola, $nombre"
 done
 ```
 
@@ -384,7 +385,7 @@ También se usa para recorrer ficheros que coinciden con un patrón:
 ```bash
 for fichero in ./*.txt; do
     [[ -e "$fichero" ]] || continue
-    printf 'Encontrado: %s\n' "$fichero"
+    echo "Encontrado: $fichero"
 done
 ```
 
@@ -398,7 +399,7 @@ La comprobación evita procesar literalmente `./*.txt` si no hay coincidencias.
 ```bash
 contador=1
 while (( contador <= 5 )); do
-    printf '%s\n' "$contador"
+    echo "$contador"
     contador=$((contador + 1))
 done
 ```
@@ -408,7 +409,7 @@ espacios y barras invertidas:
 
 ```bash
 while IFS= read -r linea || [[ -n $linea ]]; do
-    printf 'Línea: %s\n' "$linea"
+    echo "Línea: $linea"
 done < entrada.txt
 ```
 
@@ -438,7 +439,7 @@ llama:
 
 ```bash
 mostrar_uso() {
-    printf 'Uso: %s <fichero>\n' "$0" >&2
+    echo "Uso: $0 <fichero>" >&2
 }
 
 fichero_legible() {
@@ -447,7 +448,7 @@ fichero_legible() {
 }
 
 if fichero_legible "${1:-}"; then
-    printf 'El fichero se puede leer\n'
+    echo "El fichero se puede leer"
 else
     mostrar_uso
     exit 1
@@ -461,7 +462,8 @@ leer.
 `return` termina una función y devuelve un código de estado; no devuelve
 texto. Para comunicar un resultado lógico, deja que la última orden de la
 función proporcione su estado, o usa `return 0` para éxito y un valor distinto
-de cero para fallo. Para producir texto, usa `printf` y captura su salida:
+de cero para fallo. Para guardar el texto que muestra una función, captura su
+salida:
 
 ```bash
 obtener_fecha() {
@@ -487,28 +489,28 @@ ejemplo, argumentos incorrectos, ruta inválida y fallo de una operación.
 Un esqueleto de validación:
 
 ```bash
-#!/usr/bin/env bash
+#!/bin/bash
 
 if [[ $# -ne 1 ]]; then
-    printf 'Uso: %s <fichero>\n' "$0" >&2
+    echo "Uso: $0 <fichero>" >&2
     exit 2
 fi
 
 fichero=$1
 if [[ ! -f "$fichero" ]]; then
-    printf 'Error: no es un fichero regular: %s\n' "$fichero" >&2
+    echo "Error: no es un fichero regular: $fichero" >&2
     exit 1
 fi
 if [[ ! -r "$fichero" ]]; then
-    printf 'Error: no se puede leer: %s\n' "$fichero" >&2
+    echo "Error: no se puede leer: $fichero" >&2
     exit 1
 fi
 
 lineas=$(wc -l < "$fichero") || {
-    printf 'Error al contar las líneas\n' >&2
+    echo "Error al contar las líneas" >&2
     exit 1
 }
-printf 'Líneas: %s\n' "$lineas"
+echo "Líneas: $lineas"
 exit 0
 ```
 
@@ -542,7 +544,7 @@ campo a una variable:
 
 ```bash
 while IFS=: read -r usuario clave uid gid descripcion home shell; do
-    printf '%s: UID=%s, HOME=%s\n' "$usuario" "$uid" "$home"
+    echo "$usuario: UID=$uid, HOME=$home"
 done < /etc/passwd
 ```
 
