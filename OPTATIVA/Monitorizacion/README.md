@@ -16,7 +16,3 @@ recursos.
 ## Estado
 
 En desarrollo. Los contenidos se irán añadiendo progresivamente.
-
-## Licencia
-
-Este proyecto se distribuye bajo la licencia [GNU General Public License v3.0](LICENSE).

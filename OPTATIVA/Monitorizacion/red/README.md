@@ -1,5 +1,13 @@
 # Tráfico de la red
 
+## Ejercicio práctico
+
+[Realizar el ejercicio «Análisis de red local con ARP y Nmap»](ejercicio_practico.md)
+(hoja de respuestas). También está disponible el
+[PDF original](ejercicio-analisis-red-local-arp-nmap.pdf).
+Realiza las exploraciones únicamente en la red del aula y sobre los equipos
+autorizados por el profesor.
+
 ## Captura de tráfico con `tcpdump`
 
 Instala `tcpdump` con `sudo apt install tcpdump` en Debian/Ubuntu o con
@@ -171,8 +179,89 @@ ss -t -a
 ss -t -l -n
 
 # Mostrar puertos TCP y UDP en escucha y los procesos asociados
-sudo ss -plunt
+sudo ss -plutn
 
 # Mostrar conexiones TCP establecidas
 ss -t -o state established
 ```
+
+## Consulta de dominios e IP con `whois`
+
+Instala `whois` con `sudo apt install whois` en Debian/Ubuntu o con
+`sudo dnf install whois` en Fedora.
+
+`whois` consulta los datos públicos de registro de un dominio o una dirección
+IP, como el registrador o la organización responsable del bloque de direcciones.
+La información disponible depende del registro y puede estar limitada por
+políticas de privacidad.
+
+### Ejemplos
+
+```bash
+# Consultar los datos de registro de un dominio
+whois example.com
+
+# Consultar la información de registro de una dirección IP
+whois 8.8.8.8
+```
+
+## Exploración de puertos con `nmap`
+
+Instala `nmap` con `sudo apt install nmap` en Debian/Ubuntu o con
+`sudo dnf install nmap` en Fedora.
+
+`nmap` comprueba qué equipos responden y qué puertos están accesibles. Úsalo
+solo en equipos y redes propios o para los que tengas autorización.
+
+| Opción | Función |
+| --- | --- |
+| `-p PUERTOS` | Escanea los puertos indicados; admite listas y rangos, por ejemplo `22,80,443` o `1-1024`. |
+| `-sV` | Intenta identificar los servicios y sus versiones en los puertos abiertos. |
+| `-sn` | Descubre si el equipo responde sin escanear sus puertos. |
+
+### Ejemplos
+
+```bash
+# Comprobar qué puertos están accesibles en el propio equipo
+nmap 127.0.0.1
+
+# Escanear puertos concretos del propio equipo
+nmap -p 22,80,443 127.0.0.1
+
+# Detectar los servicios y sus versiones en esos puertos
+nmap -sV -p 22,80,443 127.0.0.1
+
+# Comprobar si el propio equipo responde, sin escanear puertos
+nmap -sn 127.0.0.1
+```
+
+## Consulta de la caché ARP con `arp`
+
+En Debian/Ubuntu, instala el comando con `sudo apt install net-tools`; en
+Fedora, con `sudo dnf install net-tools`. `arp` muestra y administra la caché
+ARP, que relaciona direcciones IPv4 de la red local con direcciones MAC. En
+sistemas actuales, `ip neigh` es la alternativa recomendada.
+
+| Opción | Función |
+| --- | --- |
+| `-a` | Muestra las entradas de la caché ARP. |
+| `-n` | Muestra las direcciones numéricamente, sin resolver nombres. |
+| `-i INTERFAZ` | Limita la consulta a la interfaz indicada. |
+
+### Ejemplos
+
+```bash
+# Mostrar las entradas de la caché ARP
+arp -a
+
+# Mostrar las direcciones IP sin resolver nombres
+arp -n
+
+# Consultar las entradas asociadas a una interfaz
+arp -i eth0
+
+# Consultar la tabla de vecinos con la herramienta actual
+ip neigh
+```
+
+Sustituye `eth0` por una interfaz disponible en el sistema.
