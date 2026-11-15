@@ -1,0 +1,25 @@
+#!/usr/sbin/nft -f
+flush ruleset
+
+table inet filtro {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        iif lo accept
+        ct state established,related accept
+        ct state invalid drop
+
+        tcp dport { 22, 80, 443 } accept
+        icmp type echo-request limit rate 5/second accept
+        # Imprescindible en IPv6: Neighbor Discovery (equivalente a ARP)
+        icmpv6 type { echo-request, nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert } accept
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+    }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}

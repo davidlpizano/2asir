@@ -1,0 +1,46 @@
+#!/usr/sbin/nft -f
+flush ruleset
+
+# Requiere habilitar net.ipv4.ip_forward=1 en /etc/sysctl.d/99-forward.conf
+# Sustituye enp1s0 (WAN) y enp3s0 (LAN) por tus interfaces reales
+
+table inet nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        # Redirigir puerto externo 8080 al servidor web interno 192.168.1.10:80
+        iifname "enp1s0" tcp dport 8080 dnat ip to 192.168.1.10:80
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        # Enmascarar trafico saliente hacia Internet
+        oifname "enp1s0" masquerade
+    }
+}
+
+table inet filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        iif lo accept
+        ct state established,related accept
+        ct state invalid drop
+        iifname "enp3s0" tcp dport 22 accept
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+
+        ct state invalid drop
+        # Permitir salida de la LAN a Internet y sus respuestas
+        iifname "enp3s0" oifname "enp1s0" accept
+        iifname "enp1s0" oifname "enp3s0" ct state established,related accept
+
+        # Permitir el trafico DNAT (ya llega con la IP y puerto traducidos)
+        iifname "enp1s0" oifname "enp3s0" ip daddr 192.168.1.10 tcp dport 80 accept
+    }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}

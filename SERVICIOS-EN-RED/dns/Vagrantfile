@@ -1,0 +1,58 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require "base64"
+require "json"
+require "securerandom"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  secrets_path = File.join(__dir__, ".lab-secrets.json")
+  unless File.exist?(secrets_path)
+    secrets = {
+      "TRANSFER_KEY" => Base64.strict_encode64(SecureRandom.random_bytes(32))
+    }
+    File.write(secrets_path, JSON.pretty_generate(secrets), mode: "w", perm: 0o600)
+  end
+  secrets = JSON.parse(File.read(secrets_path))
+
+  transfer_key = ENV.fetch("TRANSFER_KEY", secrets.fetch("TRANSFER_KEY"))
+
+  config.vm.define "dns1" do |node|
+    node.vm.hostname = "dns1"
+    node.vm.network "private_network", ip: "192.168.10.10", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "DNS1"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell",
+      path: "provision/dns1.sh",
+      env: { "TRANSFER_KEY" => transfer_key }
+  end
+
+  config.vm.define "dns2" do |node|
+    node.vm.hostname = "dns2"
+    node.vm.network "private_network", ip: "192.168.10.11", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "DNS2"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell",
+      path: "provision/dns2.sh",
+      env: { "TRANSFER_KEY" => transfer_key }
+  end
+
+  config.vm.define "cliente1" do |node|
+    node.vm.hostname = "cliente1"
+    node.vm.network "private_network", ip: "192.168.10.100", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "CLIENTE1-DNS"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell", path: "provision/cliente.sh"
+  end
+end

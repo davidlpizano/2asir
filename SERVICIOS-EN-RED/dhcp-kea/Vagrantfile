@@ -1,0 +1,51 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  bridge = ENV.fetch("IF_BRIDGE", "eno1")
+
+  config.vm.define "kea1" do |node|
+    node.vm.hostname = "KEA1"
+    node.vm.network "public_network", bridge: bridge, ip: "172.26.30.203", netmask: "255.255.0.0"
+    node.vm.network "private_network", ip: "192.168.10.2", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "KEA1"
+      vb.memory = "1024"
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    end
+    node.vm.provision "shell",
+      path: "provision/kea.sh",
+      args: ["kea1", "MASTER", "100"]
+  end
+
+  config.vm.define "kea2" do |node|
+    node.vm.hostname = "KEA2"
+    node.vm.network "public_network", bridge: bridge, ip: "172.26.30.204", netmask: "255.255.0.0"
+    node.vm.network "private_network", ip: "192.168.10.3", netmask: "255.255.255.0", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "KEA2"
+      vb.memory = "1024"
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    end
+    node.vm.provision "shell",
+      path: "provision/kea.sh",
+      args: ["kea2", "BACKUP", "90"]
+  end
+
+  config.vm.define "cliente1" do |node|
+    node.vm.hostname = "cliente1"
+    node.vm.network "private_network", type: "dhcp", virtualbox__intnet: "lan_asir"
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "CLIENTE1"
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    node.vm.provision "shell", path: "provision/cliente.sh"
+  end
+end

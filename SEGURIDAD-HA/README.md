@@ -5,7 +5,9 @@ medidas necesarias para mantenerlos operativos ante fallos y contingencias.
 
 ## Contenidos
 
-Los temas y materiales de la asignatura se irán incorporando durante el curso.
+| Tema | Descripción |
+| --- | --- |
+| [Cortafuegos y NAT en Linux con `nftables`](cortafuegos-nftables/README.md) | Fundamentos de Netfilter, seguimiento de conexiones (`conntrack`), arquitectura y sintaxis de `nftables`, NAT (`SNAT`, `MASQUERADE`, `DNAT`), plantillas, depuración y ejercicios. |
 
 ## Objetivo
 

@@ -1,0 +1,15 @@
+include "/etc/bind/keys/transfer.key";
+
+zone "asir.lan" {
+    type master;
+    file "/var/lib/bind/db.asir.lan";
+    allow-transfer { key transfer-key; };
+    also-notify { 192.168.10.11; };
+};
+
+zone "10.168.192.in-addr.arpa" {
+    type master;
+    file "/var/lib/bind/db.10.168.192";
+    allow-transfer { key transfer-key; };
+    also-notify { 192.168.10.11; };
+};
