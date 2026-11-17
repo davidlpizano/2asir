@@ -8,7 +8,8 @@ Esta sección recoge contenidos complementarios y recursos opcionales del curso.
   orquestación.
 - [Git para principiantes](Git-para-principiantes/README.md): control de
   versiones y trabajo con repositorios.
-- [Monitorización](Monitorizacion/README.md): procesos, memoria, disco y red.
+- [Monitorización](Monitorizacion/README.md): procesos, memoria, disco, red y
+  visualización de métricas con Grafana.
 
 ## Objetivo
 

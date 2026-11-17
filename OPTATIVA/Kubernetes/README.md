@@ -1,21 +1,33 @@
 # Kubernetes
 
-Introducción a Kubernetes y a los conceptos básicos que se utilizan para
-desplegar y administrar aplicaciones en contenedores.
+Kubernetes es una plataforma de orquestación de contenedores que permite
+implementar, escalar y gestionar aplicaciones distribuidas de forma automatizada.
 
-## Contenidos
+Cada apartado de este tema se encuentra en la carpeta `docs/` y se organiza por
+bloques temáticos para facilitar la consulta.
 
-1. **Clúster:** conjunto de máquinas que ejecutan y gestionan las aplicaciones.
-2. **Nodo:** máquina que forma parte del clúster. El plano de control coordina
-   el clúster y los nodos de trabajo ejecutan las cargas.
-3. **Pod:** unidad mínima desplegable de Kubernetes; agrupa uno o más
-   contenedores que comparten recursos de red y almacenamiento.
-4. **Deployment:** describe el estado deseado de una aplicación y permite
-   mantener y actualizar sus réplicas.
-5. **Service:** proporciona un punto de acceso estable para comunicarse con un
-   conjunto de Pods.
-6. **kubectl:** herramienta de línea de comandos para consultar y administrar
-   recursos del clúster.
+## Índice
+
+1. [Introducción](docs/1.md)
+2. [Instalación](docs/2.md)
+3. [Pods](docs/3.md)
+4. [ReplicaSets](docs/4.md)
+5. [Deployments](docs/5.md)
+
+## Conceptos clave
+
+- **Clúster:** conjunto de máquinas que ejecutan la infraestructura y la
+  gestión de Kubernetes.
+- **Nodo:** máquina del clúster que ejecuta los contenedores y workloads.
+- **Pod:** unidad mínima desplegable; agrupa uno o varios contenedores que
+  comparten red y almacenamiento.
+- **ReplicaSet:** garantiza que siempre haya el número deseado de réplicas de
+  un pod.
+- **Deployment:** describe el estado deseado de una aplicación y gestiona su
+  actualización y escalado.
+- **Service:** expone de forma estable los pods que forman parte de una
+  aplicación.
+- **kubectl:** herramienta de línea de comandos para administrar el clúster.
 
 ## Primeros comandos
 
@@ -24,10 +36,11 @@ desplegar y administrar aplicaciones en contenedores.
 kubectl config current-context
 kubectl cluster-info
 
-# Listar nodos y Pods
+# Listar nodos, Pods y despliegues
 kubectl get nodes
 kubectl get pods --all-namespaces
+kubectl get deployments -A
 ```
 
 Los comandos requieren acceso a un clúster configurado y credenciales
-adecuadas. Practica primero en un entorno local o de laboratorio.
+adecuadas. Es recomendable practicar primero en un entorno local o de laboratorio.
