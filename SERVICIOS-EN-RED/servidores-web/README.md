@@ -22,7 +22,7 @@ Documentación técnica del despliegue en **dos instancias AWS EC2 (Debian 13 `t
 ## Contenido del directorio
 
 ```text
-servidores-web-varnish/
+servidores-web/
 ├── README.md
 ├── config/
 │   ├── apache-m1/
