@@ -27,6 +27,7 @@ servidores-web/
 ├── config/
 │   ├── apache-m1/
 │   │   ├── cache-headers.conf
+│   │   ├── catalogo.py
 │   │   ├── davidservicios-le-ssl.conf
 │   │   ├── davidservicios.conf
 │   │   ├── remoteip.conf
@@ -38,6 +39,9 @@ servidores-web/
 │   └── varnish-m2/
 │       ├── default.vcl
 │       └── varnish.override.conf
+├── img/
+│   ├── comparativa-antes-despues.png
+│   └── latencia-peticiones-ab.png
 └── docs/
     ├── 01-fundamentos-y-arquitectura.md
     ├── 02-requisitos-e-instalacion.md
