@@ -9,6 +9,7 @@ red, especialmente DNS y DHCP, así como su despliegue y administración.
 | --- | --- |
 | [Laboratorio DHCP con Kea](dhcp-kea/README.md) | Práctica de DHCPv4 con ISC Kea en alta disponibilidad (`hot-standby`), router virtual con Keepalived y NAT con nftables en Debian mediante Vagrant. |
 | [Laboratorio DNS con BIND 9](dns/README.md) | Práctica de servidores DNS maestro/esclavo con BIND 9, transferencias TSIG, subdominio lógico y delegación de subdominios en Debian mediante Vagrant. |
+| [Servidores web en AWS: Apache, Varnish y ab](servidores-web-varnish/README.md) | Documentación de servicio en dos instancias AWS (Debian 13) con Apache 2.4, HTTPS (Certbot + No-IP), Varnish Cache 7.7 y pruebas comparativas con `ab` (RA3). |
 
 ## Nota
 
