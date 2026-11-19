@@ -12,7 +12,7 @@ recursos.
 | [**Procesos**](procesos/README.md) | Seguimiento de procesos y de su actividad. |
 | [**Memoria y disco**](memoria-y-disco/README.md) | Uso de memoria, espacio de almacenamiento y rendimiento del disco. |
 | [**Red**](red/README.md) | Supervisión del tráfico y la actividad de red. |
-| [**Grafana**](grafana/README.md) | Visualización de métricas y creación de paneles de monitorización. |
+| [**Grafana**](grafana/README.md) | Instalación de Prometheus y Grafana, y visualización de métricas mediante paneles. |
 
 ## Estado
 

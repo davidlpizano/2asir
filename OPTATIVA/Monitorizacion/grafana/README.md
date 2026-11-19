@@ -1,8 +1,10 @@
-# Grafana
+# Monitorización con Prometheus y Grafana
 
-Grafana permite visualizar métricas mediante paneles y dashboards. En este
-apartado se añadirán recursos y prácticas para crear paneles de monitorización.
+Prometheus recopila y almacena métricas, mientras que Grafana permite
+consultarlas y representarlas mediante paneles.
 
-## Estado
+## Índice
 
-En desarrollo.
+1. [Instalación de Prometheus y Node Exporter](prometheus-node-exporter.md)
+2. [Instalación de Grafana](instalacion-grafana.md)
+3. [Añadir Prometheus como fuente de datos en Grafana](prometheus-data-source.md)
